@@ -6,6 +6,7 @@ const register = async (req, res) => {
   const { email, password, name } = req.body;
 
   try {
+    console.log("inside try reg");
     const registerResponse = await registerUser(email, password);
     await saveUserMetadata(email, name); // Store user metadata in DynamoDB
     res.status(200).json({ message: 'User registered successfully', registerResponse });
