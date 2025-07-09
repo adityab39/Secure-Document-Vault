@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 
 // Load authentication routes
 app.use('/auth', authRoutes);
-app.use('/api', s3Routes);
+app.use('/documents', s3Routes);
 
 
 app.listen(port, () => {
