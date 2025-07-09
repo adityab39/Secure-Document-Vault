@@ -2,6 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth-router');
+const s3Routes = require("./routes/s3-router")
 require('dotenv').config();  // To use environment variables from .env file
 
 const app = express();
@@ -12,6 +13,8 @@ app.use(bodyParser.json());
 
 // Load authentication routes
 app.use('/auth', authRoutes);
+app.use('/api', s3Routes);
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
