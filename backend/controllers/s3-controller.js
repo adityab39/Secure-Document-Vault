@@ -1,14 +1,25 @@
 const AWS = require('aws-sdk');
-const s3 = require('../services/s3-service');  // Import the S3 configuration
-const { v4: uuidv4 } = require('uuid'); // To generate unique file names
+const s3 = require('../services/s3-service');  
+const { v4: uuidv4 } = require('uuid'); 
 const dynamo = new AWS.DynamoDB.DocumentClient();
-const TABLE_NAME = 'document_types';
+const DOCUMENT_TYPES_TABLE = 'document_types';
+const USER_DOCUMENTS_TABLE = 'user_documents';
 
 
 
 const uploadDocument = (req, res) => {
   const file = req.file;
-  const fileName = uuidv4() + '-' + file.originalname; 
+  const {userId, typeId, typeName} = req.body;
+  
+  if (!file) {
+    return res.status(400).send({ message: 'No file uploaded' });
+  }
+
+  if (!file || !userId || !typeId || !typeName) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  const fileName = uuidv4() + '-' + file.originalname;
 
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME, 
@@ -17,21 +28,41 @@ const uploadDocument = (req, res) => {
     ContentType: file.mimetype,
   };
 
-  s3.upload(params, (err, data) => {
+  s3.upload(params, async(err, data) => {
     if (err) {
       console.error('Error uploading file: ', err);
       return res.status(500).send({ message: 'Failed to upload file', error: err });
     }
-    res.status(200).send({
-      message: 'File uploaded successfully',
-      fileUrl: data.Location 
-    });
+    const documentId = uuidv4();
+    const dbParams = {
+      TableName: USER_DOCUMENTS_TABLE,
+      Item: {
+        userId,
+        documentId,
+        typeId,
+        typeName,
+        s3Url: data.Location,
+        s3Key: fileName,
+        uploadedAt: new Date().toISOString()
+      }
+    };
+
+    try {
+      await dynamo.put(dbParams).promise();
+      res.status(200).send({
+        message: 'File uploaded and recorded successfully',
+        document: dbParams.Item
+      });
+    } catch (dbErr) {
+      console.error('Error saving metadata to DynamoDB: ', dbErr);
+      res.status(500).send({ message: 'File uploaded but metadata save failed', error: dbErr });
+    }
   });
 };
 
 const getDocumentTypes = async (req, res) => {
   try {
-    const result = await dynamo.scan({ TableName: TABLE_NAME }).promise();
+    const result = await dynamo.scan({ TableName: DOCUMENT_TYPES_TABLE }).promise();
 
     const documentTypes = result.Items
       .filter(item => item.enabled !== false)
