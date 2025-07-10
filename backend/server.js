@@ -16,6 +16,11 @@ app.use('/auth', authRoutes);
 app.use('/documents', s3Routes);
 
 
+app.get('/', (req, res) => {
+  res.send('Welcome to the Secure Document Vault API');
+});
+
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

@@ -7,4 +7,6 @@ const s3Controller = require("../controllers/s3-controller")
 
 
 router.post('/add', upload.single('document'), s3Controller.uploadDocument);
+router.get('/get', s3Controller.getDocumentTypes);
+
 module.exports = router;
