@@ -8,18 +8,15 @@ const TABLE_NAME = 'document_types';
 
 const uploadDocument = (req, res) => {
   const file = req.file;
-  const fileName = uuidv4() + '-' + file.originalname; // Unique file name
+  const fileName = uuidv4() + '-' + file.originalname; 
 
-  // Set up S3 upload parameters
   const params = {
-    Bucket: process.env.AWS_BUCKET_NAME,  // Replace with your S3 bucket name
+    Bucket: process.env.AWS_BUCKET_NAME, 
     Key: fileName,
     Body: file.buffer,
     ContentType: file.mimetype,
-     // Or 'private', depending on your use case
   };
 
-  // Upload the file to S3
   s3.upload(params, (err, data) => {
     if (err) {
       console.error('Error uploading file: ', err);
@@ -27,7 +24,7 @@ const uploadDocument = (req, res) => {
     }
     res.status(200).send({
       message: 'File uploaded successfully',
-      fileUrl: data.Location // S3 URL for the uploaded file
+      fileUrl: data.Location 
     });
   });
 };
