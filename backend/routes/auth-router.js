@@ -7,5 +7,7 @@ const verifyToken = require('../middleware/verifyToken');
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.get('/user', verifyToken, authController.getUserInfo);
+router.post('/confirm-otp', authController.confirmOtp); // OTP confirmation route
+
 
 module.exports = router;
