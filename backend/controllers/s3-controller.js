@@ -4,6 +4,8 @@ const { v4: uuidv4 } = require('uuid');
 const dynamo = new AWS.DynamoDB.DocumentClient();
 const DOCUMENT_TYPES_TABLE = 'document_types';
 const USER_DOCUMENTS_TABLE = 'user_documents';
+const url = require('url');  // Import the 'url' module
+
 
 
 
@@ -60,19 +62,32 @@ const uploadDocument = (req, res) => {
   });
 };
 
+// Function to get document types and extract the object key from the object URL
 const getDocumentTypes = async (req, res) => {
   try {
     const result = await dynamo.scan({ TableName: DOCUMENT_TYPES_TABLE }).promise();
 
     const documentTypes = result.Items
       .filter(item => item.enabled !== false)
-      .map(item => ({
-        typeId: item.typeId,
-        typeName: item.typeName,
-        sampleImageUrl: item.sampleImageUrl || null,
-        enabled: item.enabled || false,
-      })).sort((a, b) => Number(a.typeId) - Number(b.typeId));
+      .map(item => {
+        // Extract the object key from the sampleImageUrl
+        let objectKey = null;
+        if (item.sampleImageUrl) {
+          const parsedUrl = url.parse(item.sampleImageUrl);
+          objectKey = parsedUrl.pathname.split('/').slice(2).join('/'); // Extract key from URL
+        }
 
+        return {
+          typeId: item.typeId,
+          typeName: item.typeName,
+          sampleImageUrl: item.sampleImageUrl || null,
+          objectKey: objectKey,  // Include the object key
+          enabled: item.enabled || false,
+        };
+      })
+      .sort((a, b) => Number(a.typeId) - Number(b.typeId));
+
+    console.log(`This is the document types: ${documentTypes}`);
     res.status(200).json({ documentTypes });
   } catch (err) {
     console.error('Error fetching document types:', err);

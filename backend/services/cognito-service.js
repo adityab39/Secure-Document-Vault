@@ -54,4 +54,24 @@ const authenticateUser = async (email, password) => {
   }
 };
 
-module.exports = { registerUser, authenticateUser };
+const confirmUser = async (email, confirmationCode) => {
+  const secretHash = generateSecretHash(email);
+  const params = {
+    ClientId: process.env.COGNITO_CLIENT_ID,   // Your App Client ID
+    Username: email,
+    ConfirmationCode: confirmationCode,
+    SecretHash: secretHash         // OTP entered by the user
+  };
+
+  try {
+    const data = await cognito.confirmSignUp(params).promise();
+    return data;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+
+
+
+module.exports = { registerUser, authenticateUser, confirmUser };

@@ -1,6 +1,6 @@
 // /controllers/authController.js
 const AWS = require('aws-sdk');
-const { registerUser, authenticateUser } = require('../services/cognito-service');
+const { registerUser, authenticateUser, confirmUser } = require('../services/cognito-service');
 const { saveUserMetadata } = require('../services/dynamoDb-service');
 const { getUserInfo: getUserFromDb } = require('../services/dynamoDb-service');
 
@@ -27,6 +27,17 @@ const login = async (req, res) => {
   }
 };
 
+const confirmOtp = async (req, res) => {
+  const { email, confirmationCode } = req.body;
+
+  try {
+    const confirmResponse = await confirmUser(email, confirmationCode);
+    res.status(200).json({ message: 'User confirmed successfully', confirmResponse });
+  } catch (err) {
+    res.status(500).json({ error: 'OTP verification failed', message: err.message });
+  }
+};
+
 
 const getUserInfo = async (req, res) => {
   const email = req.user.email;
@@ -45,4 +56,4 @@ const getUserInfo = async (req, res) => {
 
 
 
-module.exports = { register, login, getUserInfo};
+module.exports = { register, login, confirmOtp, getUserInfo};
