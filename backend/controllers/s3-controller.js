@@ -123,10 +123,92 @@ const getUserDocuments = async (req, res) => {
   }
 };
 
+
+const updateDocument = async (req, res) => {
+  const { documentId, userId } = req.body;  // Assuming documentId and userId are provided in the request
+  const file = req.file;  // The new file to upload
+
+  if (!file) {
+    return res.status(400).send({ message: 'No file uploaded' });
+  }
+
+  try {
+    // Step 1: Retrieve the existing document from DynamoDB
+    const params = {
+      TableName: USER_DOCUMENTS_TABLE,
+      Key: { documentId, userId }  // Using documentId and userId to find the document
+    };
+
+    const result = await dynamo.get(params).promise();
+    if (!result.Item) {
+      return res.status(404).send({ message: 'Document not found' });
+    }
+
+    const existingDocument = result.Item;
+
+    // Step 2: Delete the old file from S3
+    const deleteParams = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: existingDocument.s3Key  // Use the existing S3 key for deletion
+    };
+
+    await s3.deleteObject(deleteParams).promise();
+
+    // Step 3: Upload the new file to S3
+    const fileName = uuidv4() + '-' + file.originalname;  // Generate a unique file name
+    const uploadParams = {
+      Bucket: process.env.AWS_BUCKET_NAME, 
+      Key: fileName,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    };
+
+    const uploadData = await s3.upload(uploadParams).promise();
+
+    // Step 4: Update the document metadata in DynamoDB
+    const updateParams = {
+      TableName: USER_DOCUMENTS_TABLE,
+      Key: { documentId, userId },  // Use the documentId and userId to find the record
+      UpdateExpression: 'set #s3Url = :url, #s3Key = :key, uploadedAt = :uploadedAt',
+      ExpressionAttributeNames: {
+        '#s3Url': 's3Url',
+        '#s3Key': 's3Key',
+      },
+      ExpressionAttributeValues: {
+        ':url': uploadData.Location,  // New S3 URL
+        ':key': fileName,             // New S3 Key
+        ':uploadedAt': new Date().toISOString(),
+      },
+      ReturnValues: 'ALL_NEW'
+    };
+
+    await dynamo.update(updateParams).promise();
+
+    // Step 5: Return success response
+    res.status(200).send({
+      message: 'Document updated successfully',
+      newDocument: {
+        documentId,
+        userId,
+        typeId: existingDocument.typeId,
+        typeName: existingDocument.typeName,
+        s3Url: uploadData.Location,
+        s3Key: fileName,
+        uploadedAt: new Date().toISOString()
+      }
+    });
+
+  } catch (err) {
+    console.error('Error updating document: ', err);
+    res.status(500).send({ message: 'Failed to update document', error: err.message });
+  }
+};
+
 module.exports = {
   uploadDocument,
   getDocumentTypes,
   deleteDocument,
-  getUserDocuments
+  getUserDocuments,
+  updateDocument,
 };
 
