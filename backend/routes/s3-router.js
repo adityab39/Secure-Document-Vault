@@ -12,5 +12,6 @@ router.get('/get', s3Controller.getDocumentTypes);
 router.delete('/delete', s3Controller.deleteDocument);
 
 
+router.get('/user',verifyToken, s3Controller.getUserDocuments);
 
 module.exports = router;

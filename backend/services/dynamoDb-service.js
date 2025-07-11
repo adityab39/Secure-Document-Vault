@@ -18,7 +18,6 @@ const saveUserMetadata = async (email, name) => {
     await dynamoDB.put(params).promise();
     return { message: 'User metadata saved successfully' };
   } catch (err) {
-    console.log(err);
     throw new Error('Error saving user metadata:', err);
   }
 };

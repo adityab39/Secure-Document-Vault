@@ -118,9 +118,40 @@ const deleteDocument = (req, res) => {
   });
 };
 
+const getUserDocuments = async (req, res) => {
+  const email = req.user.email;
+  if (!email) return res.status(400).json({ error: 'Email not found in token' });
+
+  try {
+    const userResult = await dynamo.get({
+      TableName: 'users',
+      Key: { email }
+    }).promise();
+
+    if (!userResult.Item) {
+      return res.status(404).json({ error: 'User not found in users table' });
+    }
+
+    const userId = userResult.Item.userId;
+
+    const docsResult = await dynamo.query({
+      TableName: 'user_documents',
+      KeyConditionExpression: 'userId = :uid',
+      ExpressionAttributeValues: {
+        ':uid': userId
+      }
+    }).promise();
+
+    res.status(200).json({ documents: docsResult.Items });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch documents', message: err.message });
+  }
+};
+
 module.exports = {
   uploadDocument,
   getDocumentTypes,
-  deleteDocument
+  deleteDocument,
+  getUserDocuments
 };
 
