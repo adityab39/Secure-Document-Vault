@@ -162,18 +162,17 @@ const deleteDocument = async (req, res) => {
 
 
 const updateDocument = async (req, res) => {
-  const { documentId, userId } = req.body;  // Assuming documentId and userId are provided in the request
-  const file = req.file;  // The new file to upload
+  const { documentId, userId } = req.body; 
+  const file = req.file; 
 
   if (!file) {
     return res.status(400).send({ message: 'No file uploaded' });
   }
 
   try {
-    // Step 1: Retrieve the existing document from DynamoDB
     const params = {
       TableName: USER_DOCUMENTS_TABLE,
-      Key: { documentId, userId }  // Using documentId and userId to find the document
+      Key: { documentId, userId }
     };
 
     const result = await dynamo.get(params).promise();
@@ -182,17 +181,14 @@ const updateDocument = async (req, res) => {
     }
 
     const existingDocument = result.Item;
-
-    // Step 2: Delete the old file from S3
     const deleteParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: existingDocument.s3Key  // Use the existing S3 key for deletion
+      Key: existingDocument.s3Key  
     };
 
     await s3.deleteObject(deleteParams).promise();
 
-    // Step 3: Upload the new file to S3
-    const fileName = uuidv4() + '-' + file.originalname;  // Generate a unique file name
+    const fileName = uuidv4() + '-' + file.originalname; 
     const uploadParams = {
       Bucket: process.env.AWS_BUCKET_NAME, 
       Key: fileName,
@@ -201,19 +197,17 @@ const updateDocument = async (req, res) => {
     };
 
     const uploadData = await s3.upload(uploadParams).promise();
-
-    // Step 4: Update the document metadata in DynamoDB
     const updateParams = {
       TableName: USER_DOCUMENTS_TABLE,
-      Key: { documentId, userId },  // Use the documentId and userId to find the record
+      Key: { documentId, userId }, 
       UpdateExpression: 'set #s3Url = :url, #s3Key = :key, uploadedAt = :uploadedAt',
       ExpressionAttributeNames: {
         '#s3Url': 's3Url',
         '#s3Key': 's3Key',
       },
       ExpressionAttributeValues: {
-        ':url': uploadData.Location,  // New S3 URL
-        ':key': fileName,             // New S3 Key
+        ':url': uploadData.Location, 
+        ':key': fileName,          
         ':uploadedAt': new Date().toISOString(),
       },
       ReturnValues: 'ALL_NEW'
@@ -221,7 +215,6 @@ const updateDocument = async (req, res) => {
 
     await dynamo.update(updateParams).promise();
 
-    // Step 5: Return success response
     res.status(200).send({
       message: 'Document updated successfully',
       newDocument: {
