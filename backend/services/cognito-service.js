@@ -13,13 +13,13 @@ function generateSecretHash(username) {
 }
 
 const registerUser = async (email, password) => {
-  const secretHash = generateSecretHash(email); // Generate inside function
+  const secretHash = generateSecretHash(email); 
 
   const params = {
     ClientId: process.env.COGNITO_CLIENT_ID,
     Username: email,
     Password: password,
-    SecretHash: secretHash,                // Correct case
+    SecretHash: secretHash,               
     UserAttributes: [
       { Name: 'email', Value: email }
     ]
@@ -34,7 +34,7 @@ const registerUser = async (email, password) => {
 };
 
 const authenticateUser = async (email, password) => {
-  const secretHash = generateSecretHash(email); // Generate inside function
+  const secretHash = generateSecretHash(email); 
 
   const params = {
     AuthFlow: 'USER_PASSWORD_AUTH',
@@ -42,7 +42,7 @@ const authenticateUser = async (email, password) => {
     AuthParameters: {
       USERNAME: email,
       PASSWORD: password,
-      SECRET_HASH: secretHash               // Include here too
+      SECRET_HASH: secretHash              
     }
   };
 
@@ -57,10 +57,10 @@ const authenticateUser = async (email, password) => {
 const confirmUser = async (email, confirmationCode) => {
   const secretHash = generateSecretHash(email);
   const params = {
-    ClientId: process.env.COGNITO_CLIENT_ID,   // Your App Client ID
+    ClientId: process.env.COGNITO_CLIENT_ID,   
     Username: email,
     ConfirmationCode: confirmationCode,
-    SecretHash: secretHash         // OTP entered by the user
+    SecretHash: secretHash         
   };
 
   try {

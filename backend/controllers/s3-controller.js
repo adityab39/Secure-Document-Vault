@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const dynamo = new AWS.DynamoDB.DocumentClient();
 const DOCUMENT_TYPES_TABLE = 'document_types';
 const USER_DOCUMENTS_TABLE = 'user_documents';
-const url = require('url');  // Import the 'url' module
+const url = require('url');  
 
 
 
@@ -62,7 +62,6 @@ const uploadDocument = (req, res) => {
   });
 };
 
-// Function to get document types and extract the object key from the object URL
 const getDocumentTypes = async (req, res) => {
   try {
     const result = await dynamo.scan({ TableName: DOCUMENT_TYPES_TABLE }).promise();
@@ -70,18 +69,17 @@ const getDocumentTypes = async (req, res) => {
     const documentTypes = result.Items
       .filter(item => item.enabled !== false)
       .map(item => {
-        // Extract the object key from the sampleImageUrl
         let objectKey = null;
         if (item.sampleImageUrl) {
           const parsedUrl = url.parse(item.sampleImageUrl);
-          objectKey = parsedUrl.pathname.split('/').slice(2).join('/'); // Extract key from URL
+          objectKey = parsedUrl.pathname.split('/').slice(2).join('/'); 
         }
 
         return {
           typeId: item.typeId,
           typeName: item.typeName,
           sampleImageUrl: item.sampleImageUrl || null,
-          objectKey: objectKey,  // Include the object key
+          objectKey: objectKey,  
           enabled: item.enabled || false,
         };
       })
@@ -93,29 +91,6 @@ const getDocumentTypes = async (req, res) => {
     console.error('Error fetching document types:', err);
     res.status(500).json({ error: 'Could not retrieve document types' });
   }
-};
-
-
-const deleteDocument = (req, res) => {
-  const { fileName } = req.body; // The key (file name) of the document to be deleted
-
-  // Set up S3 delete parameters
-  const params = {
-    Bucket: process.env.AWS_BUCKET_NAME,  // Your S3 bucket name
-    Key: fileName,                       // The key (file name) of the file to be deleted
-  };
-
-  // Delete the file from S3
-  s3.deleteObject(params, (err, data) => {
-    if (err) {
-      console.error('Error deleting file: ', err);
-      return res.status(500).send({ message: 'Failed to delete file', error: err });
-    }
-    res.status(200).send({
-      message: 'File deleted successfully',
-      data: data
-    });
-  });
 };
 
 const getUserDocuments = async (req, res) => {

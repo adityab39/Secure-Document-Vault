@@ -1,4 +1,3 @@
-// /controllers/authController.js
 const AWS = require('aws-sdk');
 const { registerUser, authenticateUser, confirmUser } = require('../services/cognito-service');
 const { saveUserMetadata } = require('../services/dynamoDb-service');
@@ -9,7 +8,7 @@ const register = async (req, res) => {
 
   try {
     const registerResponse = await registerUser(email, password);
-    await saveUserMetadata(email, name); // Store user metadata in DynamoDB
+    await saveUserMetadata(email, name);
     res.status(200).json({ message: 'User registered successfully', registerResponse });
   } catch (err) {
     res.status(500).json({ error: 'Registration failed', message: err.message });

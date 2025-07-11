@@ -1,4 +1,3 @@
-// /services/dynamoDBService.js
 const AWS = require('../config/aws-config');
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const { v4: uuidv4 } = require('uuid');
