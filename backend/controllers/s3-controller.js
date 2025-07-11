@@ -95,6 +95,29 @@ const getDocumentTypes = async (req, res) => {
   }
 };
 
+
+const deleteDocument = (req, res) => {
+  const { fileName } = req.body; // The key (file name) of the document to be deleted
+
+  // Set up S3 delete parameters
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,  // Your S3 bucket name
+    Key: fileName,                       // The key (file name) of the file to be deleted
+  };
+
+  // Delete the file from S3
+  s3.deleteObject(params, (err, data) => {
+    if (err) {
+      console.error('Error deleting file: ', err);
+      return res.status(500).send({ message: 'Failed to delete file', error: err });
+    }
+    res.status(200).send({
+      message: 'File deleted successfully',
+      data: data
+    });
+  });
+};
+
 const getUserDocuments = async (req, res) => {
   const email = req.user.email;
   if (!email) return res.status(400).json({ error: 'Email not found in token' });
@@ -128,6 +151,7 @@ const getUserDocuments = async (req, res) => {
 module.exports = {
   uploadDocument,
   getDocumentTypes,
+  deleteDocument,
   getUserDocuments
 };
 
