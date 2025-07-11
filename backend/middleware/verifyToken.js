@@ -39,9 +39,8 @@ const verifyToken = async (req, res, next) => {
   const pem = pems[decoded.header.kid];
   if (!pem) return res.status(401).json({ message: 'Unknown key ID' });
 
-  jwt.verify(token, pem, { issuer: ISSUER }, (err, payload) => {
+  jwt.verify(token, pem, { issuer: ISSUER }, async (err, payload) => {
     if (err) return res.status(401).json({ message: 'Token verification failed', error: err.message });
-
     req.user = payload;
     next();
   });
