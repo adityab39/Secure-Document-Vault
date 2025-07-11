@@ -234,11 +234,51 @@ const updateDocument = async (req, res) => {
   }
 };
 
+const downloadDocument = async (req, res) => {
+  const email = req.user.email;
+  const documentId = req.query.documentId;
+
+  try {
+    const user = await getUserFromDb(email);
+    const userId = user.userId;
+
+    const params = {
+      TableName: USER_DOCUMENTS_TABLE,
+      Key: { documentId, userId }
+    };
+
+    const result = await dynamo.get(params).promise();
+    if (!result.Item) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+
+    const s3Key = result.Item.s3Key;
+    const fileName = s3Key.split('/').pop();
+
+    const s3Params = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: s3Key,
+    };
+
+    const url = s3.getSignedUrl('getObject', {
+      ...s3Params,
+      Expires: 60 
+    });
+
+    return res.redirect(url);
+
+  } catch (err) {
+    console.error('Error downloading document:', err);
+    return res.status(500).json({ message: 'Failed to download document', error: err.message });
+  }
+};
+
 module.exports = {
   uploadDocument,
   getDocumentTypes,
   deleteDocument,
   getUserDocuments,
   updateDocument,
+  downloadDocument,
 };
 

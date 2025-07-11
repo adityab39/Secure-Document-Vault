@@ -12,5 +12,6 @@ router.get('/get', s3Controller.getDocumentTypes);
 router.delete('/delete', verifyToken, s3Controller.deleteDocument);
 router.put('/update', verifyToken, upload.single('document'), s3Controller.updateDocument);
 router.get('/user',verifyToken, s3Controller.getUserDocuments);
+router.get('/download', verifyToken, s3Controller.downloadDocument);
 
 module.exports = router;
