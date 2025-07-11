@@ -5,6 +5,7 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 const DOCUMENT_TYPES_TABLE = 'document_types';
 const USER_DOCUMENTS_TABLE = 'user_documents';
 const url = require('url');  
+const { getUserFromDb } = require('../services/dynamoDb-service');
 
 
 
@@ -120,6 +121,42 @@ const getUserDocuments = async (req, res) => {
     res.status(200).json({ documents: docsResult.Items });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch documents', message: err.message });
+  }
+};
+
+const deleteDocument = async (req, res) => {
+  const email = req.user.email;
+  const documentId = req.query.documentId;
+  const { s3Key } = req.body;
+
+  console.log(`Email: ${email}, Document ID: ${documentId}, S3 Key: ${s3Key}`);
+
+  if (!email || !documentId || !s3Key) {
+    return res.status(400).json({ error: 'Missing email, documentId, or s3Key' });
+  }
+
+  try {
+    const user = await getUserFromDb(email);
+    const userId = user.userId;
+
+    await s3.deleteObject({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: s3Key
+    }).promise();
+
+    await dynamo.delete({
+      TableName: 'user_documents',
+      Key: {
+        userId,
+        documentId
+      }
+    }).promise();
+
+    res.status(200).json({ message: 'Document deleted successfully' });
+
+  } catch (err) {
+    console.error('Delete Error:', err);
+    res.status(500).json({ message: 'Failed to delete document', error: err.message });
   }
 };
 

@@ -40,4 +40,21 @@ const getUserInfo = async (email) => {
   }
 };
 
-module.exports = { saveUserMetadata, getUserInfo };
+const getUserFromDb = async (email) => {
+  const params = {
+    TableName: 'users',
+    Key: { email }
+  };
+
+  try {
+    const result = await dynamoDB.get(params).promise();
+    if (!result.Item) {
+      throw new Error('User not found');
+    }
+    return result.Item;
+  } catch (err) {
+    throw new Error('Error fetching user from DB: ' + err.message);
+  }
+};
+
+module.exports = { saveUserMetadata, getUserInfo, getUserFromDb };
