@@ -28,6 +28,9 @@ const login = async (req, res) => {
 
 const confirmOtp = async (req, res) => {
   const { email, confirmationCode } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'PLease enter email address.' });
+  }
 
   try {
     const confirmResponse = await confirmUser(email, confirmationCode);
