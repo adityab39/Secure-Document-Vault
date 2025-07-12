@@ -1,0 +1,176 @@
+$image: 'https://source.unsplash.com/2560x1440/daily';
+$form-bg: #00897B;
+
+.outerContainer {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.formContainer {
+  display: flex;
+  flex-direction: row;
+  width: 90%;
+  max-width: 800px;
+  background: #fff;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 95%;
+    height: auto;
+  }
+}
+
+.formLeft {
+  background: #fff;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+
+  img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.formRight {
+  position: relative;
+  background: url($image) center/cover fixed;
+  flex: 2;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 0;
+  }
+
+  form {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    z-index: 1;
+
+    header {
+      text-align: center;
+      color: #fff;
+
+      h1 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 24px;
+      }
+
+      p {
+        margin-top: 5px;
+        font-size: 14px;
+        opacity: 0.7;
+      }
+    }
+
+    section {
+      margin-top: 20px;
+
+      label {
+        display: block;
+        margin-bottom: 20px;
+        color: #fff;
+
+        p {
+          margin: 0 0 6px;
+          font-size: 13px;
+          opacity: 0.6;
+        }
+
+        input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+          color: #fff;
+          padding: 8px 0;
+          font-size: 15px;
+
+          &:focus {
+            outline: none;
+            border-bottom-color: #fff;
+          }
+        }
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        background: $form-bg;
+        color: #fff;
+        border: none;
+        padding: 10px 0;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+
+        &:hover {
+          background: darken($form-bg, 5%);
+        }
+      }
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      button {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        opacity: 0.6;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  .loginForm {}
+  .registerForm {
+    section {
+      button {
+        background: $form-bg;
+        border: none;
+        width: 100%;
+        padding: 10px 0;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+
+        &:hover {
+          background: darken($form-bg, 5%);
+        }
+      }
+    }
+  }
+  .forgotForm {}
+  .otpForm {}
+}

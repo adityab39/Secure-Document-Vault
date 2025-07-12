@@ -1,0 +1,18 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+@import url('https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800');
+$image: 'https://source.unsplash.com/2560x1440/daily';
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: url($image) center/cover fixed;
+  background-color: rgb(125, 125, 125);
+  background-color: rgb(125, 125, 125);
+  
+}
+
