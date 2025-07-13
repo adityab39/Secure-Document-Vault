@@ -1,21 +1,103 @@
 'use client';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import axiosInstance from '../utils/axiosInstance';
 import Image from 'next/image';
 import styles from '../styles/Homepage.module.scss';
-import { useEffect } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+interface DocumentType {
+  typeId: string;
+  typeName: string;
+  sampleImageUrl?: string;
+  enabled: boolean;
+}
+
+const DEFAULT_DOCUMENTS: DocumentType[] = [
+  { typeId: '1', typeName: 'Birth Certificate', enabled: true },
+  { typeId: '2', typeName: 'Driver’s License', enabled: true },
+  { typeId: '3', typeName: 'Passport', enabled: true },
+  { typeId: '4', typeName: 'Social Security Card', enabled: true },
+  { typeId: '5', typeName: 'Academic Certificate', enabled: true },
+  { typeId: '6', typeName: 'Green Card / Visa', enabled: true },
+  { typeId: '7', typeName: 'Health Insurance Card', enabled: true },
+  { typeId: '8', typeName: 'Vaccination Record', enabled: true },
+  { typeId: '9', typeName: 'Student ID', enabled: true },
+  { typeId: '10', typeName: 'Resume', enabled: true },
+];
 
 export default function Homepage() {
+  const [documents, setDocuments] = useState<DocumentType[]>([]);
+  const [selectedDocUrl, setSelectedDocUrl] = useState<string | null>(null);
+  const router = useRouter();
+
   useEffect(() => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}, []);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const fetchDocuments = async () => {
+      try {
+        const res = await axiosInstance.get('/documents/get');
+        const fetched = res.data.documentTypes as DocumentType[];
+
+        const mergedDocs = DEFAULT_DOCUMENTS.map((doc) => {
+          const found = fetched.find((f) => f.typeId === doc.typeId);
+          return found ? { ...doc, ...found } : doc;
+        });
+
+        setDocuments(mergedDocs);
+        toast.success('Document types loaded!');
+      } catch (err) {
+        console.error('Error fetching documents:', err);
+        const fallback = DEFAULT_DOCUMENTS.map((doc) => ({ ...doc, sampleImageUrl: '' }));
+        setDocuments(fallback);
+        toast.error('Failed to load documents, using default');
+      }
+    };
+
+    fetchDocuments();
+  }, []);
+
+  const handleFileUpload = async (typeId: string, typeName: string) => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*,application/pdf';
+
+    fileInput.onchange = async (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('document', file);
+      formData.append('typeId', typeId);
+      formData.append('typeName', typeName);
+      formData.append('userId', localStorage.getItem('userId') || '');
+
+      try {
+        await axiosInstance.post('/documents/add', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        toast.success('Document uploaded successfully!');
+        window.location.reload();
+      } catch (err) {
+        console.error('Upload failed', err);
+        toast.error('Upload failed. Try again.');
+      }
+    };
+
+    fileInput.click();
+  };
+
   return (
     <div className={styles.container}>
+      <ToastContainer position="bottom-right" autoClose={3000} />
+
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.logo}>Document Locker</div>
         <nav className={styles.nav}>
-          <button className={`${styles.active}`}>Home</button>
+          <button className={styles.active}>Home</button>
           <button>Favorite Documents</button>
-          <button>Quick Actions</button>
           <button>Help & Support</button>
         </nav>
       </aside>
@@ -34,65 +116,54 @@ export default function Homepage() {
         </div>
 
         <section>
-  <h2 className={styles.sectionTitle}>Recent Files</h2>
-  <div className={styles.fileGrid}>
-    {[
-      {
-        title: 'Document 1',
-        detail: 'Uploaded on July 5, 2025',
-        img: 'https://images.unsplash.com/photo-1722192966983-763c33412758?q=80&w=1542&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      },
-      {
-        title: 'Document 2',
-        detail: 'Shared by Admin',
-        img: 'https://images.unsplash.com/photo-1722192966983-763c33412758?q=80&w=1542&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      },
-      {
-        title: 'Document 3',
-        detail: 'Last modified 2 days ago',
-        img: 'https://images.unsplash.com/photo-1722192966983-763c33412758?q=80&w=1542&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      },
-    ].map((doc, index) => (
-      <div key={index} className={styles.card}>
-        <img src={doc.img} alt={doc.title} className={styles.image} />
-        <h3 className={styles.cardTitle}>{doc.title}</h3>
-        <p className={styles.cardDetail}>{doc.detail}</p>
-      </div>
-    ))}
-  </div>
-</section>
+          <h2 className={styles.sectionTitle}>All Documents (10)</h2>
+          {documents.length === 0 && (
+            <p style={{ color: 'red', marginBottom: '1rem' }}>
+              No documents available — check API or fallback logic.
+            </p>
+          )}
 
-{/* All Documents Section */}
-<section style={{ marginTop: '3rem' }}>
-  <h2 className={styles.sectionTitle}>All Documents (12)</h2>
-  <div className={styles.fileGrid}>
-    {[
-      { title: 'Annual Report', detail: 'Generated May 2025' },
-      { title: 'Client Contract', detail: 'Signed by Client A' },
-      { title: 'Financial Overview', detail: 'Q2 2025 Summary' },
-      { title: 'HR Guidelines', detail: 'Updated in Jan 2025' },
-      { title: 'Audit Trail', detail: 'Reviewed by Auditor' },
-      { title: 'Meeting Notes', detail: 'From Weekly Sync' },
-      { title: 'Lecture Notes', detail: 'From Weekly Sync' },
-      { title: 'Drawing Notes', detail: 'From Weekly Sync' },
-      { title: 'Class Study', detail: 'From Weekly Sync' },
-      { title: 'Opera Class', detail: 'From Weekly Sync' },
-    ].map((doc, index) => (
-      <div key={index} className={styles.card}>
-        <img
-          src="https://images.unsplash.com/photo-1722192966983-763c33412758?q=80&w=1542&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt={doc.title}
-          className={styles.image}
-        />
-        <h3 className={styles.cardTitle}>{doc.title}</h3>
-        <p className={styles.cardDetail}>{doc.detail}</p>
-      </div>
-    ))}
-  </div>
-</section>
+          <div className={styles.fileGrid}>
+            {documents.map((doc) => (
+              <div key={doc.typeId} className={styles.card}>
+                <img
+                  src={
+                    doc.sampleImageUrl && doc.sampleImageUrl.trim() !== ''
+                      ? doc.sampleImageUrl
+                      : 'https://via.placeholder.com/300x200.png?text=Upload+Document'
+                  }
+                  alt={doc.typeName}
+                  className={styles.image}
+                  onClick={() => doc.sampleImageUrl && setSelectedDocUrl(doc.sampleImageUrl)}
+                />
 
-
+                <h3 className={styles.cardTitle}>{doc.typeName}</h3>
+                {!doc.sampleImageUrl && (
+                  <p className={styles.cardDetail}>
+                    Missing file —{' '}
+                    <span
+                      onClick={() => handleFileUpload(doc.typeId, doc.typeName)}
+                      style={{ cursor: 'pointer', color: 'blue' }}
+                    >
+                      Click to upload
+                    </span>
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
+
+      {/* Overlay */}
+      {selectedDocUrl && (
+        <div className={styles.overlay}>
+          <button className={styles.closeBtn} onClick={() => setSelectedDocUrl(null)}>
+            &times;
+          </button>
+          <img src={selectedDocUrl} alt="Preview" className={styles.previewImage} />
+        </div>
+      )}
     </div>
   );
 }
