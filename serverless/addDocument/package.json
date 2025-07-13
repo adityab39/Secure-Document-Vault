@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "aws-sdk": "^2.1692.0",
+    "buffer": "^6.0.3",
+    "busboy": "^1.6.0",
+    "stream": "^0.0.3",
+    "uuid": "^11.1.0"
+  }
+}
