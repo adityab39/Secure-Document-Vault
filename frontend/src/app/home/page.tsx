@@ -30,6 +30,7 @@ const DEFAULT_DOCUMENTS: DocumentType[] = [
 export default function Homepage() {
   const [documents, setDocuments] = useState<DocumentType[]>([]);
   const [selectedDocUrl, setSelectedDocUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -52,7 +53,9 @@ export default function Homepage() {
         const fallback = DEFAULT_DOCUMENTS.map((doc) => ({ ...doc, sampleImageUrl: '' }));
         setDocuments(fallback);
         toast.error('Failed to load documents, using default');
-      }
+      } finally {
+      setLoading(false); 
+     }
     };
 
     fetchDocuments();
@@ -68,15 +71,29 @@ export default function Homepage() {
       if (!file) return;
 
       const formData = new FormData();
-      formData.append('document', file);
+      formData.append('file', file); 
       formData.append('typeId', typeId);
       formData.append('typeName', typeName);
       formData.append('userId', localStorage.getItem('userId') || '');
 
       try {
-        await axiosInstance.post('/documents/add', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
+        const token = localStorage.getItem('token');
+        if (!token) {
+          toast.error("Missing auth token. Please log in again.");
+          return;
+        }
+
+        const authHeader = `Bearer ${token}`;
+
+        const res = await fetch('https://pytj32n2ma.execute-api.us-east-2.amazonaws.com/dev/documents/add', {
+          method: 'POST',
+          headers: {
+            Authorization: authHeader,
+          },
+          body: formData,
         });
+
+        if (!res.ok) throw new Error('Upload failed');
         toast.success('Document uploaded successfully!');
         window.location.reload();
       } catch (err) {
@@ -117,11 +134,13 @@ export default function Homepage() {
 
         <section>
           <h2 className={styles.sectionTitle}>All Documents (10)</h2>
-          {documents.length === 0 && (
+          {loading ? (
+            <p style={{ color: 'gray', marginBottom: '1rem' }}>Loading documents...</p>
+          ) : documents.length === 0 ? (
             <p style={{ color: 'red', marginBottom: '1rem' }}>
               No documents available — check API or fallback logic.
             </p>
-          )}
+          ) : null}
 
           <div className={styles.fileGrid}>
             {documents.map((doc) => (
@@ -138,17 +157,14 @@ export default function Homepage() {
                 />
 
                 <h3 className={styles.cardTitle}>{doc.typeName}</h3>
-                {!doc.sampleImageUrl && (
-                  <p className={styles.cardDetail}>
-                    Missing file —{' '}
-                    <span
-                      onClick={() => handleFileUpload(doc.typeId, doc.typeName)}
-                      style={{ cursor: 'pointer', color: 'blue' }}
-                    >
-                      Click to upload
-                    </span>
-                  </p>
-                )}
+                <div className={styles.cardActions}>
+                  <button
+                    className={styles.uploadButton}
+                    onClick={() => handleFileUpload(doc.typeId, doc.typeName)}
+                  >
+                    Add Document
+                  </button>
+                </div>
               </div>
             ))}
           </div>

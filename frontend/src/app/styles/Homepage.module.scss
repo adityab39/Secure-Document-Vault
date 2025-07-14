@@ -150,3 +150,25 @@
   z-index: 1001;
 }
 
+
+.cardActions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.uploadButton {
+  background-color: #0070f3;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #005ec2;
+  }
+}
+
