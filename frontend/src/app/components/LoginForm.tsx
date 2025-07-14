@@ -15,6 +15,7 @@ export default function LoginForm() {
     try {
       const response = await axiosInstance.post('/auth/login', { email, password });
       localStorage.setItem('token', response.data.authResponse?.IdToken);
+      localStorage.setItem('userId', response.data.userId);
       router.push('/home');
     } catch (err) {
       console.error(err);

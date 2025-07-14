@@ -95,7 +95,6 @@ export default function Homepage() {
 
         if (!res.ok) throw new Error('Upload failed');
         toast.success('Document uploaded successfully!');
-        window.location.reload();
       } catch (err) {
         console.error('Upload failed', err);
         toast.error('Upload failed. Try again.');
