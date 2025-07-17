@@ -28,35 +28,57 @@ export default function FavouriteDocument() {
           : [];
 
         setDocs(extractedDocs);
+        console.log("Fetched docs:", extractedDocs);
+
       } catch (error) {
         toast.error("Failed to fetch documents.");
       }
     };
 
     fetchDocs();
+    
   }, []);
 
   const handleDownload = async (documentId: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axiosInstance.get(`/documents/download?documentId=${documentId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob'
-      });
+  try {
+    const token = localStorage.getItem('token');
 
-      const blob = new Blob([res.data]);
-      const url = window.URL.createObjectURL(blob);
+    const response = await fetch(
+      `https://pytj32n2ma.execute-api.us-east-2.amazonaws.com/dev/documents/download?documentId=${documentId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        redirect: 'manual', 
+      }
+    );
+
+    const redirectUrl = response.headers.get('Location');
+    console.log('Redirect URL:', redirectUrl);
+    console.log('Response headers:', response);
+
+    if (redirectUrl) {
+      // Workaround to ensure the browser treats it as user-initiated
       const link = document.createElement('a');
-      link.href = url;
-      link.download = 'document';
+      link.href = redirectUrl;
+      link.download = ''; // Optional: triggers "Save as" dialog
+      link.target = '_blank';
       document.body.appendChild(link);
-      link.click();
+      link.click(); 
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      toast.error('Download failed');
+    } else {
+      toast.error('Failed to get download URL');
     }
-  };
+
+  } catch (error) {
+    console.error('Download error:', error);
+    toast.error('Download failed');
+  }
+};
+
+
+
 
   const handleDelete = async (docId: string) => {
     try {
@@ -118,10 +140,10 @@ export default function FavouriteDocument() {
         {docs.map((doc) => (
           <div className={styles.card} key={doc.documentId}>
             <img
-              src={doc.fileUrl ? `${doc.fileUrl}?v=${Date.now()}` : 'https://via.placeholder.com/300x200'}
+              src={doc.s3Url ? `${doc.s3Url}?v=${Date.now()}` : 'https://via.placeholder.com/300x200'}
               alt={doc.typeName}
               className={styles.image}
-              onClick={() => setPreview(doc.fileUrl)}
+              onClick={() => setPreview(doc.s3Url)}
             />
 
             {editId === doc.documentId ? (
