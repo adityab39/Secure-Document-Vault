@@ -133,7 +133,7 @@ export default function Homepage() {
         </div>
 
         <section>
-          <h2 className={styles.sectionTitle}>All Documents (10)</h2>
+          <h2 className={styles.sectionTitle}>All Documents (9)</h2>
           {loading ? (
             <p style={{ color: 'gray', marginBottom: '1rem' }}>Loading documents...</p>
           ) : documents.length === 0 ? (
