@@ -19,7 +19,6 @@ const DEFAULT_DOCUMENTS: DocumentType[] = [
   { typeId: '1', typeName: 'Birth Certificate', enabled: true },
   { typeId: '2', typeName: 'Driver’s License', enabled: true },
   { typeId: '3', typeName: 'Passport', enabled: true },
-  { typeId: '4', typeName: 'Social Security Card', enabled: true },
   { typeId: '5', typeName: 'Academic Certificate', enabled: true },
   { typeId: '6', typeName: 'Green Card / Visa', enabled: true },
   { typeId: '7', typeName: 'Health Insurance Card', enabled: true },
