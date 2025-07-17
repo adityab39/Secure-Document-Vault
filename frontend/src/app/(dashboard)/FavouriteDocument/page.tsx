@@ -40,42 +40,38 @@ export default function FavouriteDocument() {
   }, []);
 
   const handleDownload = async (documentId: string) => {
-  try {
-    const token = localStorage.getItem('token');
+    try {
+      const token = localStorage.getItem('token');
 
-    const response = await fetch(
-      `https://pytj32n2ma.execute-api.us-east-2.amazonaws.com/dev/documents/download?documentId=${documentId}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        redirect: 'manual', 
+      const response = await fetch(
+        `https://pytj32n2ma.execute-api.us-east-2.amazonaws.com/dev/documents/download?documentId=${documentId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const { url } = await response.json();
+
+      if (url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = ''; 
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        toast.error('Failed to get download URL');
       }
-    );
 
-    const redirectUrl = response.headers.get('Location');
-    console.log('Redirect URL:', redirectUrl);
-    console.log('Response headers:', response);
-
-    if (redirectUrl) {
-      // Workaround to ensure the browser treats it as user-initiated
-      const link = document.createElement('a');
-      link.href = redirectUrl;
-      link.download = ''; // Optional: triggers "Save as" dialog
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click(); 
-      document.body.removeChild(link);
-    } else {
-      toast.error('Failed to get download URL');
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Download failed');
     }
-
-  } catch (error) {
-    console.error('Download error:', error);
-    toast.error('Download failed');
-  }
-};
+  };
 
 
 
