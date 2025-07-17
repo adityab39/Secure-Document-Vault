@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axiosInstance from '../utils/axiosInstance';
+import axiosInstance from '../../utils/axiosInstance';
 import Image from 'next/image';
-import styles from '../styles/Homepage.module.scss';
+import styles from '../../styles/Homepage.module.scss';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+// import Sidebar from '../../components/Sidebar';
 
 interface DocumentType {
   typeId: string;
@@ -109,14 +110,15 @@ export default function Homepage() {
       <ToastContainer position="bottom-right" autoClose={3000} />
 
       {/* Sidebar */}
-      <aside className={styles.sidebar}>
+      {/* <aside className={styles.sidebar}>
         <div className={styles.logo}>Document Locker</div>
         <nav className={styles.nav}>
           <button className={styles.active}>Home</button>
           <button>Favorite Documents</button>
           <button>Help & Support</button>
         </nav>
-      </aside>
+      </aside> */}
+      {/* <Sidebar /> */}
 
       {/* Main Content */}
       <main className={styles.main}>
