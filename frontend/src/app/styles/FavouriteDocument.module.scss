@@ -1,57 +1,18 @@
 .container {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background-color: #f5f6f8;
 }
 
-.sidebar {
-  width: 300px;
-  background-color: #fff;
-  padding: 2rem 1rem;
-  border-right: 1px solid #ddd;
-}
-
-.logo {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #2d4dd8;
-  margin-bottom: 2rem;
-  padding-left: 1rem;
-}
-
-.nav button {
-  display: block;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 1rem;
-  color: #333;
-  cursor: pointer;
-  border-radius: 0.5rem;
-  margin-bottom: 0.5rem;
-  transition: background 0.2s ease;
-}
-
-.nav button:hover,
-.nav .active {
-  background-color: #e7edff;
-  color: #2d4dd8;
-}
-
 .main {
   flex: 1;
-  padding: 0; /* Remove outer space */
   margin: 0;
   padding: 2rem;
 }
 
-
-.title{
-  color: #2d4dd8;
-}
-.sectionTitle{
+.title,
+.sectionTitle {
   color: #2d4dd8;
 }
 
@@ -60,33 +21,41 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-
 .title {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
   font-weight: bold;
 }
 
 .profile {
   border-radius: 50%;
+  max-width: 40px;
 }
 
 .sectionTitle {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
   font-weight: 600;
   margin-bottom: 1rem;
 }
 
 .fileGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, auto);
-  gap: 1.5rem;
-  padding: 0 1.5rem; // 🔸 Just a little left/right space
-  margin-top: 4rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+  padding: 0 1rem;
+  margin-top: 3rem;
 }
 
+.container h2 {
+  color: black;
+  margin-top: 4rem;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 800;
+  margin-left: 1rem;
+}
 
 .card {
   background-color: #fff;
@@ -95,6 +64,7 @@
   padding: 1rem;
   text-align: center;
   transition: transform 0.2s ease;
+  max-height: 20rem;
 }
 
 .card:hover {
@@ -104,23 +74,22 @@
 .image {
   width: 100%;
   height: 160px;
-  object-fit: contain; // <-- change from 'cover' to 'contain' for placeholders
+  object-fit: contain;
   background-color: #f0f0f0;
   border: 1px dashed #ccc;
   border-radius: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
-
 .cardTitle {
   font-weight: 600;
   margin-bottom: 0.25rem;
-  color: #000000 !important; // ✅ Ensures it stays dark and visible
+  color: #000000 !important;
 }
 
 .cardDetail {
   font-size: 0.875rem;
-  color: #444 !important; // ✅ Slightly lighter than title but still readable
+  color: #444 !important;
 }
 
 .overlay {
@@ -154,11 +123,21 @@
   z-index: 1001;
 }
 
-
 .cardActions {
   margin-top: 10px;
   display: flex;
+  flex-direction: row;
   justify-content: center;
+  gap: clamp(0.75rem, 2vw, 2rem);
+  flex-wrap: wrap;
+}
+
+.cardActions button {
+  color: black;
+}
+
+.cardActions button:hover {
+  color: red;
 }
 
 .uploadButton {
@@ -170,12 +149,37 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
+}
 
-  &:hover {
-    background-color: #005ec2;
+.uploadButton:hover {
+  background-color: #005ec2;
+}
+
+/* ======= Responsive Breakpoints ======= */
+@media (max-width: 768px) {
+  .main {
+    padding: 1.25rem;
+  }
+
+  .fileGrid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    margin-top: 2rem;
+  }
+
+  .card {
+    padding: 0.75rem;
+  }
+
+  .image {
+    height: 120px;
+  }
+
+  .closeBtn {
+    font-size: 1.5rem;
+  }
+
+  .container h2 {
+    margin-left: 1rem;
+    font-size: 1.2rem;
   }
 }
-.cardActions button{
-  color: black;
-}
-
