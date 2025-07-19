@@ -66,6 +66,12 @@
     cursor: pointer;
     display: block;
   }
+  .hamburger.active {
+    background: transparent;
+    color: #000000; // Optional: change icon color when active
+    margin-top: -1rem;
+    margin-left: -1rem;
+  }
 
   .overlay {
     position: fixed;

@@ -58,6 +58,7 @@
 }
 
 .card {
+  position: relative;
   background-color: #fff;
   border-radius: 0.75rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
@@ -83,7 +84,7 @@
 
 .cardTitle {
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 3rem;
   color: #000000 !important;
 }
 
@@ -133,11 +134,18 @@
 }
 
 .cardActions button {
-  color: black;
+  color: rgb(255, 255, 255);
+  background: linear-gradient(90deg, #2d4dd8, #00c6fb);
+  background-size: 200%;
+  background-position: left;
+  transition: background-position 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s;
 }
 
 .cardActions button:hover {
-  color: red;
+  background-position: right;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .uploadButton {
@@ -149,6 +157,11 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  width: max-content;
 }
 
 .uploadButton:hover {
@@ -157,6 +170,9 @@
 
 /* ======= Responsive Breakpoints ======= */
 @media (max-width: 768px) {
+  .container{
+    padding-top: 4rem;
+  }
   .main {
     padding: 1.25rem;
   }
